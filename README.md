@@ -1,19 +1,26 @@
-## Build ##
+## Build & Deploy##
 ```
-docker build -t matching_fe .
-docker save -o matching_fe.tar matching_fe
-gzip matching_fe.tar
-scp -P 56929 matching_fe.tar.gz root@62.60.246.253:.
-rm matching_fe.tar.gz
+npm run build
+ssh root@62.60.246.253 -p 56929
+docker stop nginx
+rm -r matching_fe
+mkdir matching_fe
+exit
+
+
+scp -r -P 56929 build/* root@62.60.246.253:./matching_fe/
+ssh root@62.60.246.253 -p 56929
+docker run --rm -p 443:443 -v $PWD/matching_fe:/var/www/ -v $PWD/nginx.conf:/etc/nginx/nginx.conf -v /etc/letsencrypt/live/alicebob.ru/privkey.pem:/etc/ssl/privkey.pem -v /etc/letsencrypt/live/alicebob.ru/fullchain.pem:/etc/ssl/fullchain.pem --name nginx -d --network exch nginx:alpine
 ```
 
-## Deploy ##
-```
-ssh root@62.60.246.253 -p 56929
-docker stop matching_fe
-docker rmi matching_fe
-gunzip matching_fe.tar.gz
-docker load -i matching_fe.tar
-rm matching_fe.tar
-docker run --rm -d --network exch --name matching_fe matching_fe
-```
+
+
+
+
+
+
+
+
+
+
+
